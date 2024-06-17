@@ -25,12 +25,11 @@ pub async fn index(
         None
     };
 
-
     Ok(IndexTemplate {
         confirm: ConfirmTemplate {
             confirmed: conf_template.is_some(),
             name: conf_template.as_ref().map(|c| c.name.to_owned()),
-            escorts: conf_template.map(|c| c.escorts).unwrap_or_default(),
+            escorts: conf_template.and_then(|c| c.escorts).unwrap_or_default(),
         },
     })
 }

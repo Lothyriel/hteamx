@@ -21,12 +21,20 @@ async fn add_participant() -> AddTemplate {
 async fn set_confirmation(
     jar: CookieJar,
     State(db): State<Database>,
-    Form(form): Form<ConfirmationInfoForm>,
+    Form(mut form): Form<ConfirmationInfoForm>,
 ) -> Result<impl IntoResponse, ResponseError> {
+    form.escorts.retain(|e| !e.is_empty());
+
+    let escorts = if form.escorts.is_empty() {
+        None
+    } else {
+        Some(form.escorts)
+    };
+
     let info = ConfirmationInfo {
         time: chrono::Utc::now(),
         name: form.name.to_owned(),
-        escorts: form.escorts,
+        escorts,
     };
 
     ParticipantsRepository::new(&db).upsert(info).await?;

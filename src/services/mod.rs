@@ -41,7 +41,7 @@ impl ParticipantsRepository {
 pub struct ConfirmationInfo {
     pub time: DateTime<Utc>,
     pub name: String,
-    pub escorts: Vec<String>,
+    pub escorts: Option<Vec<String>>,
 }
 
 pub async fn get_mongo_client() -> Result<Client> {

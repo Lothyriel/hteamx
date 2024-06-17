@@ -25,7 +25,6 @@ pub async fn index(
         None
     };
 
-    tracing::error!("cookies {:?}", conf_template);
 
     Ok(IndexTemplate {
         confirm: ConfirmTemplate {

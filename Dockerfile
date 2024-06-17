@@ -3,6 +3,7 @@ FROM rust:1.76 as builder
 
 COPY ./src ./src
 COPY ./assets ./assets
+COPY ./assets/css ./assets/css
 COPY ./templates ./templates
 COPY Cargo.toml ./
 

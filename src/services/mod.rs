@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use mongodb::{bson::doc, error::Result, options::ClientOptions, Client, Collection, Database};
 
+use crate::fragments::ConfirmationInfoForm;
+
 #[derive(Clone)]
 pub struct ParticipantsRepository {
     confirmations: Collection<ConfirmationInfo>,
@@ -13,11 +15,30 @@ impl ParticipantsRepository {
         }
     }
 
-    pub async fn upsert(&self, conf: ConfirmationInfo) -> Result<()> {
-        let filter = doc! {"name": &conf.name};
-        let info = self.confirmations.find_one(filter.clone(), None).await?;
+    pub async fn upsert(&self, mut form: ConfirmationInfoForm) -> Result<()> {
+        form.escorts.retain(|e| !e.is_empty());
 
-        if info.is_some() {
+        let escorts = if form.escorts.is_empty() {
+            None
+        } else {
+            Some(form.escorts.iter().map(|e| e.trim().to_owned()).collect())
+        };
+
+        let conf = ConfirmationInfo {
+            time: chrono::Utc::now(),
+            name: form.name.trim().to_owned(),
+            escorts,
+        };
+
+        let filter = doc! {"name": &conf.name};
+
+        let exists = self
+            .confirmations
+            .find_one(filter.clone(), None)
+            .await?
+            .is_some();
+
+        if exists {
             let update = doc! { "$set": { "escorts": conf.escorts } };
             self.confirmations.update_one(filter, update, None).await?;
         } else {

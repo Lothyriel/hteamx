@@ -48,7 +48,7 @@ pub async fn get_mongo_client() -> Result<Client> {
     dotenv::dotenv().ok();
 
     let connection_string = std::env::var("MONGO_CONNECTION_STRING")
-        .unwrap_or_else(|_| "mongodb://cha:P@SSW0RD@localhost/?retryWrites=true".to_string());
+        .unwrap_or_else(|_| "mongodb://localhost/?retryWrites=true".to_string());
 
     let options = ClientOptions::parse(connection_string).await?;
 

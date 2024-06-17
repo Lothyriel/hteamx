@@ -3,7 +3,6 @@ FROM rust:1.76 as builder
 
 COPY ./src ./src
 COPY ./assets ./assets
-COPY ./assets/css ./assets/css
 COPY ./templates ./templates
 COPY Cargo.toml ./
 
@@ -15,5 +14,6 @@ FROM debian:stable-slim
 EXPOSE 8080
 
 COPY --from=builder /target/release/hteamx /
+COPY --from=builder ./assets ./assets
 
 ENTRYPOINT ["./hteamx"]

@@ -13,6 +13,6 @@ FROM debian:stable-slim
 
 EXPOSE 8080
 
-COPY --from=builder /target/release/pocket_planner /
+COPY --from=builder /target/release/hteamx /
 
-ENTRYPOINT ["./pocket_planner"]
+ENTRYPOINT ["./hteamx"]

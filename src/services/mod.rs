@@ -1,10 +1,5 @@
 use chrono::{DateTime, Utc};
-use mongodb::{
-    bson::doc,
-    error::Result,
-    options::{ClientOptions, UpdateOptions},
-    Client, Collection, Database,
-};
+use mongodb::{bson::doc, error::Result, options::ClientOptions, Client, Collection, Database};
 
 #[derive(Clone)]
 pub struct ParticipantsRepository {
@@ -18,18 +13,16 @@ impl ParticipantsRepository {
         }
     }
 
-    pub async fn upsert(&self, conf: &ConfirmationInfo) -> Result<()> {
-        let options = UpdateOptions::builder().upsert(true).build();
+    pub async fn upsert(&self, conf: ConfirmationInfo) -> Result<()> {
+        let filter = doc! {"name": &conf.name};
+        let info = self.confirmations.find_one(filter.clone(), None).await?;
 
-        let doc = doc! {
-            "time": conf.time,
-            "name": conf.name.to_string(),
-            "escorts": conf.escorts.to_owned()
-        };
-
-        self.confirmations
-            .update_one(doc! { "name": &conf.name }, doc, options)
-            .await?;
+        if info.is_some() {
+            let update = doc! { "$set": { "escorts": conf.escorts } };
+            self.confirmations.update_one(filter, update, None).await?;
+        } else {
+            self.confirmations.insert_one(conf, None).await?;
+        }
 
         Ok(())
     }

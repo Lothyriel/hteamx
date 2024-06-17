@@ -29,7 +29,7 @@ async fn set_confirmation(
         escorts: form.escorts,
     };
 
-    ParticipantsRepository::new(&db).upsert(&info).await?;
+    ParticipantsRepository::new(&db).upsert(info).await?;
 
     let cookie = Cookie::build((COOKIE_NAME, form.name))
         .http_only(true)

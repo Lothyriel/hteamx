@@ -2,7 +2,8 @@
 FROM rust:1.76 as builder
 
 COPY ./src ./src
-COPY ./assets/ ./assets/
+COPY ./assets ./assets
+COPY ./templates ./templates
 COPY Cargo.toml ./
 
 RUN cargo build --release

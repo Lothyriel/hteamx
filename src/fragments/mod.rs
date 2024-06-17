@@ -4,7 +4,7 @@ use mongodb::Database;
 
 use crate::{
     routes::{ResponseError, COOKIE_NAME},
-    services::{ConfirmationInfo, ParticipantsRepository},
+    services::ParticipantsRepository,
 };
 
 pub fn routes(db: Database) -> Router<Database> {
@@ -21,32 +21,16 @@ async fn add_participant() -> AddTemplate {
 async fn set_confirmation(
     jar: CookieJar,
     State(db): State<Database>,
-    Form(mut form): Form<ConfirmationInfoForm>,
+    Form(form): Form<ConfirmationInfoForm>,
 ) -> Result<impl IntoResponse, ResponseError> {
-    form.escorts.retain(|e| !e.is_empty());
-
-    let escorts = if form.escorts.is_empty() {
-        None
-    } else {
-        Some(form.escorts)
-    };
-
-    let info = ConfirmationInfo {
-        time: chrono::Utc::now(),
-        name: form.name.to_owned(),
-        escorts,
-    };
-
-    ParticipantsRepository::new(&db).upsert(info).await?;
-
-    let cookie = Cookie::build((COOKIE_NAME, form.name))
+    let cookie = Cookie::build((COOKIE_NAME, form.name.trim().to_owned()))
         .http_only(true)
         .path("/")
         .max_age(time::Duration::days(30));
 
-    let jar = jar.add(cookie);
+    ParticipantsRepository::new(&db).upsert(form).await?;
 
-    Ok((jar, ConfirmedTemplate))
+    Ok((jar.add(cookie), ConfirmedTemplate))
 }
 
 #[derive(Debug, serde::Deserialize)]
